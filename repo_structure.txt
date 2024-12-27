@@ -1,0 +1,36 @@
+📁 quant_portfolio/
+├── 📁 api/                      # FastAPI application
+│   ├── 📄 main.py              # API entry point
+│   ├── 📁 routers/             # API route modules
+│   │   ├── 📄 portfolio.py
+│   │   ├── 📄 analysis.py
+│   │   └── 📄 predictions.py
+│   ├── 📁 models/              # Pydantic models for API
+│   └── 📁 middleware/          # Auth, logging, etc.
+│
+├── 📁 core/                    # Core business logic
+│   ├── 📁 portfolio/           # Portfolio management
+│   │   ├── 📄 portfolio.py
+│   │   └── 📄 optimization.py
+│   ├── 📁 analysis/           # Statistical analysis
+│   │   ├── 📄 statistics.py
+│   │   └── 📄 risk_metrics.py
+│   └── 📁 ml/                 # Machine learning
+│       ├── 📄 models.py
+│       ├── 📄 features.py
+│       └── 📄 training.py
+│
+├── 📁 data/                   # Data handling
+│   ├── 📁 sources/           # Data sources
+│   │   ├── 📄 market_data.py
+│   │   └── 📄 fundamental_data.py
+│   ├── 📁 processors/        # Data processing
+│   └── 📁 storage/           # Database interactions
+│
+├── 📁 config/                 # Configuration
+│   ├── 📄 settings.py
+│   └── 📄 logging.py
+│
+├── 📁 utils/                 # Shared utilities
+├── 📁 tests/                 # Test suite
+└── 📄 requirements.txt
