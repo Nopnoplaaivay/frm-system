@@ -1,1 +1,6 @@
-from src.services.strategies.stat_analysis.eda.eda_portfolio import EDAPortfolio
+from src.services.strategies.portfolio_analysis.portfolio_eda import PortfolioEDA
+from src.services.strategies.portfolio_analysis.portfolio_autocorr import PortfolioAutoCorr
+from src.services.strategies.portfolio_analysis.portfolio_spectraldensity import PortfolioSpectralDensity
+from src.services.strategies.portfolio_analysis.portfolio_distance import PortfolioDistance
+from src.services.strategies.portfolio_analysis.portfolio_garch import PortfolioGarch
+from src.services.strategies.portfolio_analysis.portfolio_ratios import PortfolioRatios
