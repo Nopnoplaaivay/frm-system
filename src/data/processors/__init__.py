@@ -1,1 +1,1 @@
-from src.data.processors.processors import Processors
+from .processors import Processors

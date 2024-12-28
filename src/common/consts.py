@@ -16,3 +16,11 @@ class CommonConsts:
         "VHM",
         "NLG",
     ]
+
+    SEQUENCE_LENGTH: int = 63
+    HIDDEN_SIZE: int = 32
+    NUM_LAYERS: int = 4
+    BATCH_SIZE: int = 32
+    LEARNING_RATE: float = 0.001
+    EPOCHS: int = 100
+    FORECAST_DAYS: int = 63  # 3 months - weekdays

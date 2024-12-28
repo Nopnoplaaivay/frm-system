@@ -166,7 +166,7 @@ class PortfolioRatios(StrategyInterface):
             axes[i].set_title(f"{best_metric}", fontsize = 12, weight = 'bold')
             axes[i].set_xlabel("Asset", fontsize = 12, weight = 'bold')
             axes[i].set_ylabel("Weight", fontsize = 12, weight = 'bold')
-            axes[i].set_xticklabels(indices, rotation=90 , fontsize = 12, weight = 'bold')
+            axes[i].set_xticklabelsx(indices, rotation=90 , fontsize = 12, weight = 'bold')
 
         plt.tight_layout()
         plt.savefig(f"{CommonConsts.IMG_FOLDER}\\portopt_weight.jpg", dpi=600)

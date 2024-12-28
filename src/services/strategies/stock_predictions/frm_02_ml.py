@@ -25,29 +25,29 @@ symbols = ['IONQ', 'RGTI', 'QUBT', 'QBTS', 'GOOGL', 'IBM', 'MSFT', 'NVDA', 'QTUM
 for symbol in symbols:
 # Select one stock (e.g., MSFT) and normalize the data
     #symbol = symbol
-    data = df[symbol].values.reshape(-1, 1)
-    scaler = MinMaxScaler()
-    data_normalized = scaler.fit_transform(data)
+    # data = df[symbol].values.reshape(-1, 1)
+    # scaler = MinMaxScaler()
+    # data_normalized = scaler.fit_transform(data)
 
-    # Create time series dataset
-    sequence_length = 63  # Use 60 days of data to predict the next value
-    X, y = [], []
+    # # Create time series dataset
+    # sequence_length = 63  # Use 60 days of data to predict the next value
+    # X, y = [], []
 
-    for i in range(len(data_normalized) - sequence_length):
-        X.append(data_normalized[i:i+sequence_length])
-        y.append(data_normalized[i+sequence_length])
+    # for i in range(len(data_normalized) - sequence_length):
+    #     X.append(data_normalized[i:i+sequence_length])
+    #     y.append(data_normalized[i+sequence_length])
 
-    X = np.array(X)
-    y = np.array(y)
+    # X = np.array(X)
+    # y = np.array(y) 
 
-    # Split into train and test sets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    # # Split into train and test sets
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Convert to PyTorch tensors
-    X_train = torch.tensor(X_train, dtype=torch.float32)
-    y_train = torch.tensor(y_train, dtype=torch.float32)
-    X_test = torch.tensor(X_test, dtype=torch.float32)
-    y_test = torch.tensor(y_test, dtype=torch.float32)
+    # # Convert to PyTorch tensors
+    # X_train = torch.tensor(X_train, dtype=torch.float32)
+    # y_train = torch.tensor(y_train, dtype=torch.float32)
+    # X_test = torch.tensor(X_test, dtype=torch.float32)
+    # y_test = torch.tensor(y_test, dtype=torch.float32)
 
     # Define the RNN model
     class StockRNN(nn.Module):
@@ -68,10 +68,10 @@ for symbol in symbols:
 
 
     # Initialize the model
-    input_size = 1
-    hidden_size = 32
-    num_layers = 4
-    output_size = 1
+    # input_size = 1
+    # hidden_size = 32
+    # num_layers = 4
+    # output_size = 1
 
     model = StockRNN(input_size, hidden_size, num_layers, output_size)
     criterion = nn.MSELoss()
@@ -90,9 +90,7 @@ for symbol in symbols:
     # Train the model
     epochs = 100
     batch_size = 32
-
     train_loader = DataLoader(list(zip(X_train, y_train)), batch_size=batch_size, shuffle=True)
-
     for epoch in range(epochs):
         model.train()
         epoch_loss = 0
@@ -103,8 +101,10 @@ for symbol in symbols:
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
-        
         print(f'Epoch {epoch+1}/{epochs}, Loss: {epoch_loss/len(train_loader):.4f}')
+
+
+
 
     # Evaluate the model
     model.eval()
