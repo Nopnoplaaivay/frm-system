@@ -7,3 +7,6 @@ class StatisticalAnalysisService:
 
     def analyze(self, data):
         return self._strategy.analyze(data)
+
+    def visualize(self, data):
+        self._strategy.visualize(data)
