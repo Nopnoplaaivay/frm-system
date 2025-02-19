@@ -1,10 +1,9 @@
-import pandas as pd
-
 from abc import ABC, abstractmethod
+import pandas as pd
 
 class StrategyInterface(ABC):
     @abstractmethod
-    async def compute(self, df: pd.DataFrame):
+    async def compute(self):
         pass
 
     @abstractmethod

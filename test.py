@@ -2,6 +2,7 @@ import asyncio
 import time
 
 from src.modules.yfinance import PortfolioMatrix
+from src.modules.pipelines import PortfolioPipeline
 
 
 async def test():
@@ -11,8 +12,8 @@ async def test():
     time_range = '5y'
 
     matrix = await PortfolioMatrix.build(symbols=symbols, interval=interval, time_range=time_range)
-    print(matrix)
-    print(f"Build matrix time: {time.time() - start_time}")
+    pipeline = PortfolioPipeline(price_matrix=matrix)
+    results = await pipeline.run()
 
 if __name__ == '__main__':
     asyncio.run(test())

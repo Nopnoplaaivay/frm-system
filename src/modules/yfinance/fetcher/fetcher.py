@@ -70,7 +70,7 @@ class YfinanceFetcher:
         # Compare months and years instead of exact dates
         if actual_start_date.year > expected_start_year or \
                 (actual_start_date.year == expected_start_year and actual_start_date.month > expected_start_month):
-            LOGGER.warning(f"WARNING: Insufficient data for {symbol}. "
+            LOGGER.warning(f"Insufficient data for {symbol}. "
                   f"Expected start month/year: {expected_start_month}/{expected_start_year}, "
                   f"but got: {actual_start_date.month}/{actual_start_date.year}. "
                   f"Removing {symbol} from the list.")
