@@ -2,18 +2,17 @@ import aiohttp
 import asyncio
 import datetime
 import pandas as pd
-import pandas_market_calendars as mcal
 
 from src.utils.logger import LOGGER
 from src.common.consts import YfinanceConsts
 from src.utils.time_utils import TimeUtils
 
 
-class YfinanceData:
+class YfinanceFetcher:
     MARKET = "VN"  # Assuming this is a constant for the market suffix
 
     @classmethod
-    async def call_hist_price_api(cls, symbol: str, interval: str = "1d", time_range: str = "5y") -> pd.DataFrame:
+    async def call_hist_price_api(cls, symbol, interval, time_range) -> pd.DataFrame:
         if time_range not in YfinanceConsts.VALID_RANGES:
             raise ValueError(f"Invalid range value: {time_range}")
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}.{cls.MARKET}?interval={interval}&range={time_range}"
@@ -35,34 +34,23 @@ class YfinanceData:
                     df['timestamp'] = df['timestamp'].dt.date
 
                     # Check if stock has enough records range (today - range)
-                    start_date = df['timestamp'].min()
-                    cls.check_data_sufficiency(symbol, df, time_range)
+                    if cls.check_data_sufficiency(symbol, df, time_range) == False:
+                        return None
 
                     df.set_index('timestamp', inplace=True)
-
-                    # Rename columns excluding timestamp
                     df.columns = [f"{symbol}_{col}" for col in df.columns if col != 'timestamp']
                     return df
         except Exception as e:
             raise e
 
     @classmethod
-    async def download(cls, symbols: list, interval: str = "1d", range: str = "5y") -> pd.DataFrame:
-        tasks = [cls.call_hist_price_api(symbol=symbol, interval=interval, time_range=range) for symbol in symbols]
+    async def download(cls, symbols: list = ["BID"], interval: str = "1d", time_range: str = "5y") -> pd.DataFrame:
+        tasks = [cls.call_hist_price_api(symbol=symbol, interval=interval, time_range=time_range) for symbol in symbols]
         results = await asyncio.gather(*tasks)
         return pd.concat(results, axis=1)
 
     @staticmethod
     def check_data_sufficiency(symbol: str, df: pd.DataFrame, time_range: str):
-        """
-        Checks if the stock has sufficient historical data based on the specified range.
-        Uses month-based validation instead of exact dates.
-
-        Args:
-            symbol (str): Stock symbol.
-            df (pd.DataFrame): DataFrame containing the stock's historical data.
-            time_range (str): The requested range (e.g., "5y").
-        """
         # Parse the requested range into years or months
         end_date = datetime.datetime.now().date()
         if time_range.endswith("y"):  # Years
@@ -78,12 +66,19 @@ class YfinanceData:
 
         # Get the actual date range of the fetched data
         actual_start_date = df['timestamp'].min()
-        actual_end_date = df['timestamp'].max()
 
         # Compare months and years instead of exact dates
         if actual_start_date.year > expected_start_year or \
                 (actual_start_date.year == expected_start_year and actual_start_date.month > expected_start_month):
-            LOGGER.warn(f"WARNING: Insufficient data for {symbol}. "
+            LOGGER.warning(f"WARNING: Insufficient data for {symbol}. "
                   f"Expected start month/year: {expected_start_month}/{expected_start_year}, "
-                  f"but got: {actual_start_date.month}/{actual_start_date.year}.")
+                  f"but got: {actual_start_date.month}/{actual_start_date.year}. "
+                  f"Removing {symbol} from the list.")
+            
+            return False
+        return True
+        
+            
+            
+            
 

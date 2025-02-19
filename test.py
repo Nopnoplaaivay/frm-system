@@ -1,19 +1,18 @@
 import asyncio
 import time
 
-from src.modules.yfinance.data import YfinanceData
+from src.modules.yfinance import PortfolioMatrix
 
 
 async def test():
     start_time = time.time()
     symbols = ['BID', 'CTG', 'VCB', 'VPB', 'EIB', 'HDB', 'MBB', 'STB', 'ACB', 'TCB']
-    raw_data = await YfinanceData.download(symbols=symbols)
-    print(f"Download data time: {time.time() - start_time}")
-    raw_data.to_csv('raw_data.csv')
-    print(f"Saved data time: {time.time() - start_time}")
-    # cleaned_data = DataCleaner.process_price_data(raw_data)
-    # print(f"Clean data time: {time.time() - start_time}")
-    # cleaned_data.to_csv('processed_data.csv')
+    interval = '1d'
+    time_range = '5y'
+
+    matrix = await PortfolioMatrix.build(symbols=symbols, interval=interval, time_range=time_range)
+    print(matrix)
+    print(f"Build matrix time: {time.time() - start_time}")
 
 if __name__ == '__main__':
     asyncio.run(test())
