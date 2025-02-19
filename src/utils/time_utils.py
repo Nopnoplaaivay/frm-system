@@ -1,6 +1,7 @@
 import datetime
 import pytz
 
+from src.common.consts import YfinanceConsts
 
 class TimeUtils:
     @classmethod
