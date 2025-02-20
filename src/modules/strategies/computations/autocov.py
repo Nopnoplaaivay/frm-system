@@ -11,7 +11,7 @@ class PortfolioAutoCov(StrategyInterface):
         self.price_matrix = price_matrix
         self.symbols = price_matrix.columns
 
-    async def compute(self):
+    def compute(self):
         max_lag = 30
         autocov_results = {symbol: [] for symbol in self.symbols}
 
@@ -31,7 +31,3 @@ class PortfolioAutoCov(StrategyInterface):
         plt.tight_layout()
         plt.savefig(f'{CommonConsts.IMG_FOLDER}\\autocov_test.jpg', dpi=600)
         return plt
-    
-    def visualize(self):
-        pass
-    

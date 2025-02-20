@@ -16,7 +16,7 @@ class PortfolioDistance(StrategyInterface):
         self.price_matrix = price_matrix
         self.symbols = price_matrix.columns
 
-    async def compute(self):
+    def compute(self):
         lag = 5
         log_DF = pd.DataFrame([])
         for index in range(len(self.symbols)):
@@ -69,8 +69,4 @@ class PortfolioDistance(StrategyInterface):
         plt.yticks(fontsize = 16, weight = 'bold')
         plt.tight_layout()
         plt.savefig(f'{CommonConsts.IMG_FOLDER}\\distance_03.jpg', dpi=600)
-
         return plt
-
-    def visualize(self, df):    
-        pass
