@@ -1,60 +1,61 @@
 import asyncio
+import pandas as pd
 import streamlit as st
-from src.modules.strategies.techniques import (
-    PortfolioAutoCov,
-    PortfolioAutoCorr,
-    PortfolioDistance
-)
 from src.modules.yfinance import PortfolioMatrix
 from src.modules.pipelines import PortfolioPipeline
-from src.common.consts import CommonConsts
+from src.common.consts import CommonConsts, YfinanceConsts
 
 
-async def build_price_matrix(selected_symbols):
+async def build_price_matrix(selected_symbols, time_range):
     # Fetch the portfolio price matrix
-    portfolio_price_matrix = await PortfolioMatrix.build(symbols=selected_symbols)
+    portfolio_price_matrix = await PortfolioMatrix.build(symbols=selected_symbols, time_range=time_range)
     return portfolio_price_matrix
 
 
 def streamlit_app():
     st.title("Financial Risk Management App")
 
-    """Select stocks"""
-    selected_symbols = st.multiselect("Build Portfolio", CommonConsts.model_symbols)
-    if not selected_symbols:
-        st.warning("Please select at least one stock symbol.")
-        return
+    """Side bar"""
+    with st.sidebar:
+        """Build portfolio"""
+        selected_symbols = st.multiselect("Build Portfolio", CommonConsts.STOCKS_LIST)
+        if not selected_symbols:
+            st.warning("Please select at least one stock symbol.")
+            return
+        
+        """Select time range"""
+        time_range = st.radio("Select time range", YfinanceConsts.AVAILABLE_RANGES)
+        time_range = time_range.lower()
+        if not time_range:
+            st.warning("Please select a time range.")
+            return
+        
+        """Build portfolio price matrix"""
+        if st.button("Build"):
+            with st.spinner("Loading matrix..."):
+                try:
+                    portfolio_price_matrix = asyncio.run(build_price_matrix(selected_symbols, time_range))
 
-    if st.button("Build"):
-        with st.spinner("Loading matrix..."):
-            try:
-                # Build price matrix
-                portfolio_price_matrix = asyncio.run(build_price_matrix(selected_symbols))
+                    st.session_state.portfolio_price_matrix = portfolio_price_matrix
+                    st.success("Matrix loaded successfully!")
+                except Exception as e:
+                    st.error(f"An error occurred while loading the matrix: {e}")
+                    raise e
 
-                # Store the matrix in session state
-                st.session_state.portfolio_price_matrix = portfolio_price_matrix
-                st.success("Matrix loaded successfully!")
-            except Exception as e:
-                st.error(f"An error occurred while loading the matrix: {e}")
-                return
+    """Show portfolio price matrix"""
+    with st.expander("View Portfolio Price Matrix", expanded=False):
+        if "portfolio_price_matrix" in st.session_state:
 
-    # Display the DataFrame if it exists in session state
+            # Sort index to display the most recent date first
+            sorted_matrix = st.session_state.portfolio_price_matrix.sort_index(ascending=False)
+            st.dataframe(sorted_matrix)
+
+    """Analyze the portfolio"""
     if "portfolio_price_matrix" in st.session_state:
-        st.write("Portfolio Price Matrix:")
-        st.dataframe(st.session_state.portfolio_price_matrix)
-
-    # Step 3: Run Pipeline Button
-    if "portfolio_price_matrix" in st.session_state:
-        if st.button("Visualize"):
+        if st.button("Analyze"):
             with st.spinner("Computing..."):
                 try:
-                    # PortfolioAutoCorr(price_matrix=st.session_state.portfolio_price_matrix).render_chart()
                     PortfolioPipeline.run(st.session_state.portfolio_price_matrix)
-
-                    # plots = run_pipeline(st.session_state.portfolio_price_matrix)
-                    # for (plot_name, result) in plots:
-                    #     st.subheader(plot_name)
-                    #     st.pyplot(result)
                 except Exception as e:
                     st.error(f"An error occurred while running the pipeline: {e}")
                     raise e

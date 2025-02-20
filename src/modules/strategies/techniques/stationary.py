@@ -1,30 +1,27 @@
 import pandas as pd
-import seaborn as sns
 import numpy as np
+import streamlit as st
 import matplotlib.pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from statsmodels.tsa.stattools import adfuller
 from statsmodels.tsa.ar_model import AutoReg
 
-
-from src.common.consts import CommonConsts
-from src.services.strategies.strategy_interface import StrategyInterface
+from src.modules.strategies.strategy_interface import StrategyInterface
 from src.utils.logger import LOGGER
 
 
 class PortfolioStationary(StrategyInterface):
-    def analyze(self, df: pd.DataFrame):
-        df["Date"] = pd.to_datetime(df["Date"])
-        df.set_index("Date", inplace=True)
+    def __init__(self, price_matrix):
+        self.price_matrix = price_matrix
+        self.symbols = price_matrix.columns
 
-        return df
+    def compute(self):
+        pass
     
-    def visualize(self, df):
-        df = self.analyze(df)
-        indices = CommonConsts.ticker_model
-        for index in range(len(indices)):
-            symbol = indices[index]
-            prices = df[symbol]
+    def render_chart(self):
+        for index in range(len(self.symbols)):
+            symbol = self.symbols[index]
+            prices = self.price_matrix[symbol]
 
             # Calculate log returns
             log_returns = np.log(prices / prices.shift(5)).dropna()
@@ -40,8 +37,6 @@ class PortfolioStationary(StrategyInterface):
             log_returns = (log_returns - log_returns_mean)/(log_returns_std)
 
             log_returns.index = pd.RangeIndex(start=0, stop=len(log_returns), step=1)
-            returns_votality = prices.std()
-
 
             # Autoregressive (AR) Model
             ar_model = AutoReg(log_returns, lags=5).fit()
@@ -68,29 +63,32 @@ class PortfolioStationary(StrategyInterface):
             LOGGER.info("\nAutoregressive Integrated Moving Average (ARIMA) Model Parameters:")
             LOGGER.info(arima_model.params)
 
+            """Stationary Analysis"""
+            st.subheader(f'Stationary Analysis for {symbol}')
             fig, axes = plt.subplots(2, 2, figsize=(16, 6))
 
             axes[0, 0].plot(log_returns, label='Actual')
             axes[0, 0].plot(ar_pred, label='AR(2)', color='orange', marker = 'o', alpha = 0.2)
-            axes[0, 0].set_title('AR Model', fontsize = 12, weight = 'bold')
+            axes[0, 0].set_title('AR Model', fontsize=12)
 
             axes[0, 1].plot(log_returns, label='Actual')
             axes[0, 1].plot(ma_pred, label='MA(2)', color='green', marker = 'o', alpha = 0.2)
-            axes[0, 1].set_title('MA Model', fontsize = 12, weight = 'bold')
+            axes[0, 1].set_title('MA Model', fontsize=12)
 
             axes[1, 0].plot(log_returns, label='Actual')
             axes[1, 0].plot(arma_pred, label='ARMA(2,2)', color='purple', marker = 'o', alpha = 0.2)
-            axes[1, 0].set_title('ARMA Model', fontsize = 12, weight = 'bold')
+            axes[1, 0].set_title('ARMA Model', fontsize=12)
 
             axes[1, 1].plot(log_returns, label='Actual')
             axes[1, 1].plot(arima_pred, label='ARIMA(2,1,2)', color='red', marker = 'o', alpha = 0.2)
-            axes[1, 1].set_title('ARIMA Model', fontsize = 12, weight = 'bold')
+            axes[1, 1].set_title('ARIMA Model', fontsize=12)
 
 
             for ax in axes.flatten():
                 ax.legend(loc='lower right')
-                ax.set_xlabel('Time [day]', fontsize = 12, weight = 'bold')
-                ax.set_ylabel('Log Return', fontsize = 12, weight = 'bold')
+                ax.set_xlabel('Time [day]', fontsize=12)
+                ax.set_ylabel('Log Return', fontsize=12)
                 ax.grid(True)
             plt.tight_layout()
-            plt.savefig(f'{CommonConsts.IMG_FOLDER}\\stationary_figures\\stationary_{symbol}.jpg', dpi = 600)
+            st.pyplot(plt)
+            # plt.savefig(f'{CommonConsts.IMG_FOLDER}\\stationary_figures\\stationary_{symbol}.jpg', dpi = 600)

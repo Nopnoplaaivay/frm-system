@@ -1,9 +1,12 @@
 import os
+import pandas as pd
 
 
 class CommonConsts:
     ROOT_FOLDER = os.path.abspath(os.path.join(os.path.dirname(__file__), 2 * "../"))
     IMG_FOLDER = os.path.join(ROOT_FOLDER, "src\imgs")
+    STOCKS_FOLDER = os.path.join(ROOT_FOLDER, "stocks")
+    STOCKS_LIST = pd.read_csv(f"{STOCKS_FOLDER}\\stocks.csv")["ticker"].tolist()
     model_symbols = [
         "BID",
         "CTG",
@@ -39,4 +42,10 @@ class YfinanceConsts:
         "10y",
         "ytd",
         "max",
+    ]
+
+    AVAILABLE_RANGES = [
+        "1Y",
+        "5Y",
+        "10Y"
     ]

@@ -2,10 +2,10 @@ import aiohttp
 import asyncio
 import datetime
 import pandas as pd
+import streamlit as st
 
 from src.utils.logger import LOGGER
 from src.common.consts import YfinanceConsts
-from src.utils.time_utils import TimeUtils
 
 
 class YfinanceFetcher:
@@ -25,27 +25,38 @@ class YfinanceFetcher:
                     data = await response.json()
 
                     # Extract relevant data from the JSON response
-                    quote_data = data['chart']['result'][0]['indicators']['quote'][0]
+                    quote_data = data["chart"]["result"][0]["indicators"]["quote"][0]
                     df = pd.DataFrame(quote_data)
 
                     # Add timestamp column
-                    df['timestamp'] = data['chart']['result'][0]['timestamp']
-                    df['timestamp'] = pd.to_datetime(df['timestamp'], unit='s')
-                    df['timestamp'] = df['timestamp'].dt.date
+                    df["timestamp"] = data["chart"]["result"][0]["timestamp"]
+                    df["timestamp"] = pd.to_datetime(df["timestamp"], unit="s")
+                    df["timestamp"] = df["timestamp"].dt.date
 
                     # Check if stock has enough records range (today - range)
                     if cls.check_data_sufficiency(symbol, df, time_range) == False:
                         return None
 
-                    df.set_index('timestamp', inplace=True)
-                    df.columns = [f"{symbol}_{col}" for col in df.columns if col != 'timestamp']
+                    df.set_index("timestamp", inplace=True)
+                    df.columns = [
+                        f"{symbol}_{col}" for col in df.columns if col != "timestamp"
+                    ]
                     return df
         except Exception as e:
-            raise e
+            LOGGER.error(f"Failed to fetch data for {symbol}: {e}")
+            st.warning(f"Yfinance doesn't provide data for {symbol}")
+            return pd.DataFrame()
 
     @classmethod
-    async def download(cls, symbols: list = ["BID"], interval: str = "1d", time_range: str = "5y") -> pd.DataFrame:
-        tasks = [cls.call_hist_price_api(symbol=symbol, interval=interval, time_range=time_range) for symbol in symbols]
+    async def download(
+        cls, symbols: list = ["BID"], interval: str = "1d", time_range: str = "5y"
+    ) -> pd.DataFrame:
+        tasks = [
+            cls.call_hist_price_api(
+                symbol=symbol, interval=interval, time_range=time_range
+            )
+            for symbol in symbols
+        ]
         results = await asyncio.gather(*tasks)
         return pd.concat(results, axis=1)
 
@@ -64,21 +75,25 @@ class YfinanceFetcher:
         else:
             raise ValueError(f"Unsupported range format: {time_range}")
 
-        # Get the actual date range of the fetched data
-        actual_start_date = df['timestamp'].min()
+        actual_start_date = df["timestamp"].min()
 
-        # Compare months and years instead of exact dates
-        if actual_start_date.year > expected_start_year or \
-                (actual_start_date.year == expected_start_year and actual_start_date.month > expected_start_month):
-            LOGGER.warning(f"Insufficient data for {symbol}. "
-                  f"Expected start month/year: {expected_start_month}/{expected_start_year}, "
-                  f"but got: {actual_start_date.month}/{actual_start_date.year}. "
-                  f"Removing {symbol} from the list.")
-            
+        if actual_start_date.year > expected_start_year or (
+            actual_start_date.year == expected_start_year
+            and actual_start_date.month > expected_start_month
+        ):
+            LOGGER.warning(
+                f"Insufficient data for {symbol}. "
+                f"Expected start month/year: {expected_start_month}/{expected_start_year}, "
+                f"but got: {actual_start_date.month}/{actual_start_date.year}. "
+                f"Removing {symbol} from the portfolio."
+            )
+
+            st.warning(
+                f"Insufficient data for {symbol}. "
+                f"Expected data range from: {expected_start_month}/{expected_start_year} - {end_date.month}/{end_date.year}\n"
+                f"Yfinance only provides from: {actual_start_date.month}/{actual_start_date.year}. - {end_date.month}/{end_date.year}. \n"
+                f"Removing {symbol} from the portfolio."
+            )
+
             return False
         return True
-        
-            
-            
-            
-

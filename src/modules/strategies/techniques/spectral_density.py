@@ -5,8 +5,6 @@ import matplotlib.pyplot as plt
 from scipy.signal import welch
 
 from src.modules.strategies.strategy_interface import StrategyInterface
-from src.common.consts import CommonConsts
-from src.utils.logger import LOGGER
 
 class PortfolioSpectralDensity(StrategyInterface):
     def __init__(self, price_matrix):
