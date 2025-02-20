@@ -6,7 +6,8 @@ from src.modules.strategies.techniques import (
     PortfolioDistance,
     PortfolioEDA,
     PortfolioGarch,
-    PortfolioPerformance
+    PortfolioPerformance,
+    PortfolioSpectralDensity,
 )
 from src.utils.logger import LOGGER
 
@@ -20,9 +21,8 @@ class PortfolioPipeline:
             # PortfolioDistance(price_matrix),
             # PortfolioEDA(price_matrix),
             # PortfolioGarch(price_matrix),
-            PortfolioPerformance(price_matrix)
+            # PortfolioPerformance(price_matrix),
+            PortfolioSpectralDensity(price_matrix),
         ]
-
-        plots = []
         for job in computations:
             job.render_chart()
