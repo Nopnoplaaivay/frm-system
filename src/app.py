@@ -1,5 +1,6 @@
+import asyncio
 import streamlit as st
-from src.modules.strategies.computations import (
+from src.modules.strategies.techniques import (
     PortfolioAutoCov,
     PortfolioAutoCorr,
     PortfolioDistance
@@ -15,14 +16,6 @@ async def build_price_matrix(selected_symbols):
     return portfolio_price_matrix
 
 
-# Asynchronous function to run the pipeline
-def run_pipeline(portfolio_price_matrix):
-    # Run pipeline (Get plots)
-    pipeline = PortfolioPipeline(price_matrix=portfolio_price_matrix)
-    plots = pipeline.run()
-    return plots
-
-
 def streamlit_app():
     st.title("Financial Risk Management App")
 
@@ -35,12 +28,8 @@ def streamlit_app():
     if st.button("Build"):
         with st.spinner("Loading matrix..."):
             try:
-                # Load price matrix
-                import asyncio
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                portfolio_price_matrix = loop.run_until_complete(build_price_matrix(selected_symbols))
-                loop.close()
+                # Build price matrix
+                portfolio_price_matrix = asyncio.run(build_price_matrix(selected_symbols))
 
                 # Store the matrix in session state
                 st.session_state.portfolio_price_matrix = portfolio_price_matrix
@@ -59,9 +48,8 @@ def streamlit_app():
         if st.button("Visualize"):
             with st.spinner("Computing..."):
                 try:
-                    st.success("Visualizing executed successfully!")
-
-                    PortfolioAutoCorr(price_matrix=st.session_state.portfolio_price_matrix).render_plot()
+                    # PortfolioAutoCorr(price_matrix=st.session_state.portfolio_price_matrix).render_chart()
+                    PortfolioPipeline.run(st.session_state.portfolio_price_matrix)
 
                     # plots = run_pipeline(st.session_state.portfolio_price_matrix)
                     # for (plot_name, result) in plots:

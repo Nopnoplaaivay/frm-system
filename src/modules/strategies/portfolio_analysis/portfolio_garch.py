@@ -6,7 +6,7 @@ from src.common.consts import CommonConsts
 from src.services.strategies.strategy_interface import StrategyInterface
 
 class PortfolioGarch(StrategyInterface):
-    def analyze(self, df: pd.DataFrame):
+    def compute(self, df: pd.DataFrame):
         indices = CommonConsts.ticker_model
         df['Date'] = pd.to_datetime(df['Date'])
         df.set_index('Date', inplace=True)
