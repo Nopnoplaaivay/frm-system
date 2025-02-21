@@ -146,8 +146,11 @@ class PortfolioPerformance(StrategyInterface):
         axes[1, 1].set_ylabel("Return", fontsize=12)
 
         plt.tight_layout()
-        plt.savefig(f"{CommonConsts.IMG_FOLDER}\\eff_frontier.jpg", dpi=600)
+        # plt.savefig(f"{CommonConsts.IMG_FOLDER}\\eff_frontier.jpg", dpi=600)
+        st.pyplot(plt)
 
+        """Portfolio Weights"""
+        st.subheader("Portfolio Weights")
         fig, axes = plt.subplots(2, 2, figsize=(12, 6))
         axes = axes.flatten()
 
